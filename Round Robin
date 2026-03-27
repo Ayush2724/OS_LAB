@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Process {
+    int pid, arrival, burst, completion, turnaround, waiting, remaining, response, started;
+};
+
+int main() {
+    int n, quantum;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    struct Process p[n];
+    for (int i = 0; i < n; i++) {
+        p[i].pid = i + 1;
+        printf("Enter Arrival Time of P%d: ", p[i].pid);
+        scanf("%d", &p[i].arrival);
+        printf("Enter Burst Time of P%d: ", p[i].pid);
+        scanf("%d", &p[i].burst);
+        p[i].remaining = p[i].burst;
+        p[i].completion = 0;
+        p[i].turnaround = 0;
+        p[i].waiting = 0;
+        p[i].response = 0;
+        p[i].started = 0; // flag to check if process has started
+    }
+
+    printf("Enter Time Quantum: ");
+    scanf("%d", &quantum);
+
+    int currentTime = 0, completed = 0;
+    float totalTAT = 0, totalWT = 0, totalRT = 0;
+
+    printf("\nGantt Chart:\n");
+
+    while (completed < n) {
+        int done = 1;
+        for (int i = 0; i < n; i++) {
+            if (p[i].arrival <= currentTime && p[i].remaining > 0) {
+                done = 0;
+
+                // Record response time when process first starts
+                if (p[i].started == 0) {
+                    p[i].response = currentTime - p[i].arrival;
+                    p[i].started = 1;
+                }
+
+                int exec = (p[i].remaining > quantum) ? quantum : p[i].remaining;
+                printf("| P%d (%d-%d) ", p[i].pid, currentTime, currentTime + exec);
+
+                currentTime += exec;
+                p[i].remaining -= exec;
+
+                if (p[i].remaining == 0) {
+                    p[i].completion = currentTime;
+                    p[i].turnaround = p[i].completion - p[i].arrival;
+                    p[i].waiting = p[i].turnaround - p[i].burst;
+
+                    totalTAT += p[i].turnaround;
+                    totalWT += p[i].waiting;
+                    totalRT += p[i].response;
+                    completed++;
+                }
+            }
+        }
+        if (done) currentTime++;
+    }
+    printf("|\n");
+
+    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\tRT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid, p[i].arrival, p[i].burst,
+               p[i].completion, p[i].turnaround,
+               p[i].waiting, p[i].response);
+    }
+
+    printf("\nAverage Turnaround Time = %.2f", totalTAT / n);
+    printf("\nAverage Waiting Time    = %.2f", totalWT / n);
+    printf("\nAverage Response Time   = %.2f\n", totalRT / n);
+
+    return 0;
+}
