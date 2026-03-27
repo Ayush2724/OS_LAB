@@ -1,0 +1,146 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Process {
+    int pid;
+    int arrival;
+    int burst;
+    int priority;
+    int completion;
+    int turnaround;
+    int waiting;
+    int response;
+    int remaining;
+    int started;
+};
+
+int main() {
+    int n, choice;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    struct Process p[n];
+    for (int i = 0; i < n; i++) {
+        p[i].pid = i + 1;
+        printf("Enter Arrival Time of P%d: ", p[i].pid);
+        scanf("%d", &p[i].arrival);
+        printf("Enter Burst Time of P%d: ", p[i].pid);
+        scanf("%d", &p[i].burst);
+        printf("Enter Priority of P%d (smaller = higher priority): ", p[i].pid);
+        scanf("%d", &p[i].priority);
+
+        p[i].remaining = p[i].burst;
+        p[i].completion = 0;
+        p[i].turnaround = 0;
+        p[i].waiting = 0;
+        p[i].response = 0;
+        p[i].started = 0;
+    }
+
+    printf("\nChoose Scheduling Algorithm\n");
+    printf("1. Non-Preemptive Priority Scheduling\n");
+    printf("2. Preemptive Priority Scheduling\n");
+    scanf("%d", &choice);
+
+    int currentTime = 0, completed = 0;
+    float totalTAT = 0, totalWT = 0, totalRT = 0;
+
+    printf("\nGantt Chart:\n");
+
+    switch (choice) {
+    case 1: // Non-Preemptive Priority Scheduling
+        while (completed < n) {
+            int idx = -1;
+            int minPriority = 999999;
+
+            for (int i = 0; i < n; i++) {
+                if (p[i].arrival <= currentTime && p[i].completion == 0) {
+                    if (p[i].priority < minPriority) {
+                        minPriority = p[i].priority;
+                        idx = i;
+                    }
+                }
+            }
+
+            if (idx == -1) {
+                currentTime++;
+                continue;
+            }
+
+            printf("| P%d (%d-%d) ", p[idx].pid, currentTime, currentTime + p[idx].burst);
+
+            p[idx].completion = currentTime + p[idx].burst;
+            p[idx].turnaround = p[idx].completion - p[idx].arrival;
+            p[idx].waiting = p[idx].turnaround - p[idx].burst;
+            p[idx].response = p[idx].waiting; // same as WT in non-preemptive
+
+            totalTAT += p[idx].turnaround;
+            totalWT += p[idx].waiting;
+            totalRT += p[idx].response;
+
+            currentTime = p[idx].completion;
+            completed++;
+        }
+        printf("|\n");
+        break;
+
+    case 2: // Preemptive Priority Scheduling
+        while (completed < n) {
+            int idx = -1;
+            int minPriority = 999999;
+
+            for (int i = 0; i < n; i++) {
+                if (p[i].arrival <= currentTime && p[i].remaining > 0) {
+                    if (p[i].priority < minPriority) {
+                        minPriority = p[i].priority;
+                        idx = i;
+                    }
+                }
+            }
+
+            if (idx == -1) {
+                currentTime++;
+                continue;
+            }
+
+            if (p[idx].started == 0) {
+                p[idx].response = currentTime - p[idx].arrival;
+                p[idx].started = 1;
+            }
+
+            printf("| P%d (%d-%d) ", p[idx].pid, currentTime, currentTime + 1);
+
+            p[idx].remaining--;
+            currentTime++;
+
+            if (p[idx].remaining == 0) {
+                p[idx].completion = currentTime;
+                p[idx].turnaround = p[idx].completion - p[idx].arrival;
+                p[idx].waiting = p[idx].turnaround - p[idx].burst;
+
+                totalTAT += p[idx].turnaround;
+                totalWT += p[idx].waiting;
+                totalRT += p[idx].response;
+                completed++;
+            }
+        }
+        printf("|\n");
+        break;
+
+    default:
+        printf("Invalid choice\n");
+    }
+
+    printf("\nPID\tAT\tBT\tPR\tCT\tTAT\tWT\tRT\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\t%d\n",
+               p[i].pid, p[i].arrival, p[i].burst, p[i].priority,
+               p[i].completion, p[i].turnaround, p[i].waiting, p[i].response);
+    }
+
+    printf("\nAverage Turnaround Time = %.2f", totalTAT / n);
+    printf("\nAverage Waiting Time    = %.2f", totalWT / n);
+    printf("\nAverage Response Time   = %.2f\n", totalRT / n);
+
+    return 0;
+}
