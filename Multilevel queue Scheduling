@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <string.h>
+
+struct Process
+{
+    char name[10];
+    int at, bt, st, ct, tat, wt, rt;
+};
+
+void fcfs(struct Process p[], int n, int *time,
+          char gantt[][10], int start[], int finish[], int *g)
+{
+    for(int i = 0; i < n; i++)
+    {
+        if(*time < p[i].at)
+            *time = p[i].at;
+
+        p[i].st = *time;
+        p[i].ct = *time + p[i].bt;
+        p[i].tat = p[i].ct - p[i].at;
+        p[i].wt = p[i].tat - p[i].bt;
+        p[i].rt = p[i].wt;
+
+        strcpy(gantt[*g], p[i].name);
+        start[*g] = p[i].st;
+        finish[*g] = p[i].ct;
+        (*g)++;
+
+        *time = p[i].ct;
+    }
+}
+
+int main()
+{
+    int n_sys, n_user;
+
+    printf("Enter no. of system processes: ");
+    scanf("%d", &n_sys);
+
+    struct Process sys[n_sys];
+
+    for(int i = 0; i < n_sys; i++)
+    {
+        printf("Enter name, AT, BT: ");
+        scanf("%s %d %d", sys[i].name, &sys[i].at, &sys[i].bt);
+    }
+
+    printf("Enter no. of user processes: ");
+    scanf("%d", &n_user);
+
+    struct Process user[n_user];
+
+    for(int i = 0; i < n_user; i++)
+    {
+        printf("Enter name, AT, BT: ");
+        scanf("%s %d %d", user[i].name, &user[i].at, &user[i].bt);
+    }
+
+    char gantt[50][10];
+    int start[50], finish[50];
+    int g = 0, time = 0;
+
+    fcfs(sys, n_sys, &time, gantt, start, finish, &g);
+    fcfs(user, n_user, &time, gantt, start, finish, &g);
+
+    printf("\nSystem Processes:\n");
+    printf("Name AT BT ST CT TAT WT RT\n");
+    for(int i = 0; i < n_sys; i++)
+    {
+        printf("%s %d %d %d %d %d %d %d\n",
+        sys[i].name, sys[i].at, sys[i].bt,
+        sys[i].st, sys[i].ct,
+        sys[i].tat, sys[i].wt, sys[i].rt);
+    }
+
+    printf("\nUser Processes:\n");
+    printf("Name AT BT ST CT TAT WT RT\n");
+    for(int i = 0; i < n_user; i++)
+    {
+        printf("%s %d %d %d %d %d %d %d\n",
+        user[i].name, user[i].at, user[i].bt,
+        user[i].st, user[i].ct,
+        user[i].tat, user[i].wt, user[i].rt);
+    }
+
+    printf("\nGantt Chart:\n|");
+    for(int i = 0; i < g; i++)
+        printf(" %s |", gantt[i]);
+
+    printf("\n%d", start[0]);
+    for(int i = 0; i < g; i++)
+        printf(" %d", finish[i]);
+
+    printf("\n");
+
+    return 0;
+}
