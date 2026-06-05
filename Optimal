@@ -1,0 +1,48 @@
+#include <stdio.h>
+
+int main() {
+    int pages[50],frame[10];
+    int n,f,i,j,fault=0;
+
+    scanf("%d",&n);
+
+    for(i=0;i<n;i++)
+        scanf("%d",&pages[i]);
+
+    scanf("%d",&f);
+
+    for(i=0;i<f;i++)
+        frame[i]=-1;
+
+    for(i=0;i<n;i++) {
+
+        int found=0;
+
+        for(j=0;j<f;j++)
+            if(frame[j]==pages[i])
+                found=1;
+
+        if(!found) {
+
+            int pos=-1,far=-1;
+
+            for(j=0;j<f;j++) {
+                int k;
+
+                for(k=i+1;k<n;k++)
+                    if(frame[j]==pages[k])
+                        break;
+
+                if(k>far) {
+                    far=k;
+                    pos=j;
+                }
+            }
+
+            frame[pos==-1?0:pos]=pages[i];
+            fault++;
+        }
+    }
+
+    printf("Page Faults=%d\n",fault);
+}
