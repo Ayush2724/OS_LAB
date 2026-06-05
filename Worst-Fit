@@ -1,0 +1,26 @@
+#include <stdio.h>
+
+int main() {
+    int block[10],process[10];
+    int nb,np,i,j,worst;
+
+    scanf("%d",&nb);
+    for(i=0;i<nb;i++) scanf("%d",&block[i]);
+
+    scanf("%d",&np);
+    for(i=0;i<np;i++) scanf("%d",&process[i]);
+
+    for(i=0;i<np;i++) {
+        worst=-1;
+
+        for(j=0;j<nb;j++)
+            if(block[j]>=process[i])
+                if(worst==-1 || block[j]>block[worst])
+                    worst=j;
+
+        if(worst!=-1) {
+            printf("P%d -> Block %d\n",i+1,worst+1);
+            block[worst]-=process[i];
+        }
+    }
+}
