@@ -1,0 +1,40 @@
+#include <stdio.h>
+
+int main() {
+    int n, i, j, hyper = 20;
+    int period[10], burst[10], remain[10];
+
+    printf("Enter number of tasks: ");
+    scanf("%d", &n);
+
+    for(i=0;i<n;i++) {
+        printf("Task %d Burst Time and Period: ", i+1);
+        scanf("%d%d",&burst[i],&period[i]);
+        remain[i] = 0;
+    }
+
+    printf("\nSchedule:\n");
+
+    for(int t=0;t<hyper;t++) {
+
+        for(i=0;i<n;i++)
+            if(t % period[i] == 0)
+                remain[i] = burst[i];
+
+        int task=-1, min=999;
+
+        for(i=0;i<n;i++) {
+            if(remain[i]>0 && period[i]<min) {
+                min = period[i];
+                task=i;
+            }
+        }
+
+        if(task==-1)
+            printf("Time %d : Idle\n",t);
+        else {
+            printf("Time %d : Task %d\n",t,task+1);
+            remain[task]--;
+        }
+    }
+}
