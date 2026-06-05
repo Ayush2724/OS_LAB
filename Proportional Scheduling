@@ -1,0 +1,25 @@
+#include <stdio.h>
+
+int main() {
+    int n,i,total=0;
+    int share[10];
+
+    printf("Enter number of processes: ");
+    scanf("%d",&n);
+
+    for(i=0;i<n;i++) {
+        printf("Enter share of P%d: ",i+1);
+        scanf("%d",&share[i]);
+        total+=share[i];
+    }
+
+    printf("\nCPU Allocation:\n");
+
+    for(i=0;i<n;i++) {
+        printf("P%d gets %.2f%% CPU\n",
+               i+1,
+               (share[i]*100.0)/total);
+    }
+
+    return 0;
+}
